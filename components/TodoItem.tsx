@@ -1,7 +1,9 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 type Todo = {
   id: string;
+  title: string;
   text: string;
   completed: boolean;
 };
@@ -10,18 +12,35 @@ type Props = {
   todo: Todo;
   onToggle: () => void;
   onDelete: () => void;
+  onEdit: () => void;
 };
 
-export default function TodoItem({ todo, onToggle, onDelete }: Props) {
+export default function TodoItem({ todo, onToggle, onDelete, onEdit }: Props) {
   return (
-    <View style={styles.card}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{todo.text}</Text>
-      </View>
+    <View style={styles.item}>
+      {/* Toggle */}
+      <TouchableOpacity onPress={onToggle} style={styles.left}>
+        <View
+          style={[styles.checkbox, todo.completed && styles.checkboxDone]}
+        />
+        <View>
+          <Text style={[styles.title, todo.completed && styles.doneText]}>
+            {todo.title}
+          </Text>
+          <Text style={styles.text}>{todo.text}</Text>
+        </View>
+      </TouchableOpacity>
 
+      {/* Actions */}
       <View style={styles.actions}>
+        {/* ✏️ EDIT */}
+        <TouchableOpacity onPress={onEdit}>
+          <Feather name="edit" size={20} color="#6C6EE8" />
+        </TouchableOpacity>
+
+        {/* 🗑 DELETE */}
         <TouchableOpacity onPress={onDelete}>
-          <Text style={styles.icon}>🗑️</Text>
+          <Feather name="trash-2" size={20} color="#FF5A5A" />
         </TouchableOpacity>
       </View>
     </View>
@@ -29,33 +48,45 @@ export default function TodoItem({ todo, onToggle, onDelete }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: {
+  item: {
     flexDirection: "row",
-    backgroundColor: "#9b9dd6", // xanh tím nhạt
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 14, // bo tròn
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 10,
     alignItems: "center",
   },
-  title: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#000",
+  left: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
   },
-  subTitle: {
-    fontSize: 12,
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#6C6EE8",
+  },
+  checkboxDone: {
+    backgroundColor: "#6C6EE8",
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  text: {
+    fontSize: 13,
+    color: "#666",
+  },
+  doneText: {
+    textDecorationLine: "line-through",
     color: "#999",
-    marginTop: 4,
   },
   actions: {
     flexDirection: "row",
-    gap: 10,
-  },
-  icon: {
-    fontSize: 18,
+    gap: 12,
   },
 });

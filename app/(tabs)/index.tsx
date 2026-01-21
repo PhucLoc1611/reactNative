@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Modal,
+  Alert,
+  Platform,
 } from "react-native";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -45,6 +47,35 @@ export default function TodoScreen() {
     setText("");
     setVisible(true);
   };
+  const removeTodo = (id: string) => {
+    setTodos((prevTodos) => {
+      const newTodos = prevTodos.filter((t) => t.id !== id);
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newTodos));
+      return newTodos;
+    });
+  };
+
+  const confirmDelete = (id: string) => {
+    if (Platform.OS === "web") {
+      const ok = window.confirm("Bạn có chắc chắn muốn xóa todo này không?");
+      if (ok) removeTodo(id);
+      return;
+    }
+
+    Alert.alert(
+      "Delete todo",
+      "Bạn có chắc chắn muốn xóa todo này không?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => removeTodo(id),
+        },
+      ],
+      { cancelable: true },
+    );
+  };
 
   /* ---------- EDIT ---------- */
   const openEdit = (todo: Todo) => {
@@ -57,7 +88,7 @@ export default function TodoScreen() {
   /* ---------- TOGGLE COMPLETE ---------- */
   const toggleTodo = async (id: string) => {
     const newTodos = todos.map((t) =>
-      t.id === id ? { ...t, completed: !t.completed } : t
+      t.id === id ? { ...t, completed: !t.completed } : t,
     );
     setTodos(newTodos);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newTodos));
@@ -71,7 +102,7 @@ export default function TodoScreen() {
 
     if (editingTodo) {
       newTodos = todos.map((t) =>
-        t.id === editingTodo.id ? { ...t, title, text } : t
+        t.id === editingTodo.id ? { ...t, title, text } : t,
       );
     } else {
       newTodos = [
@@ -91,11 +122,6 @@ export default function TodoScreen() {
   };
 
   /* ---------- DELETE ---------- */
-  const removeTodo = async (id: string) => {
-    const newTodos = todos.filter((t) => t.id !== id);
-    setTodos(newTodos);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newTodos));
-  };
 
   /* ---------- RENDER ITEM ---------- */
   const renderItem = ({ item }: { item: Todo }) => (
@@ -124,7 +150,7 @@ export default function TodoScreen() {
         <Feather name="edit" size={20} color="#4F46E5" />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => removeTodo(item.id)}>
+      <TouchableOpacity onPress={() => confirmDelete(item.id)}>
         <Feather name="trash" size={20} color="#EF4444" />
       </TouchableOpacity>
     </View>
